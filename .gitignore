@@ -1,0 +1,4 @@
+# Arquivos que NÃO devem subir
+app_web.py
+.venv/
+__pycache__/
