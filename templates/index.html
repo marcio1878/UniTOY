@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTOY - Universo dos Brinquedos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #fefae0;
+        }
+        .topo-toy { 
+            background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+            color: white; 
+            border-bottom: 5px solid #ffb703;
+        }
+        .badge-toy {
+            background-color: #ffb703;
+            color: #023047;
+            font-size: 0.9rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+        .nav-tabs .nav-link { 
+            color: #0077b6; 
+            font-weight: bold; 
+            border-radius: 12px 12px 0 0;
+            margin-right: 5px;
+            background-color: #e2eafc;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs .nav-link:hover {
+            background-color: #bde0fe;
+            color: #0077b6;
+        }
+        .nav-tabs .nav-link.active { 
+            background-color: #ffb703 !important;
+            color: #023047 !important; 
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+        .card-toy {
+            border-radius: 20px;
+            border: 3px solid #bde0fe;
+            background-color: white;
+        }
+        .btn-gravar {
+            background-color: #2a9d8f;
+            color: white;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+        }
+        .btn-gravar:hover {
+            background-color: #21867a;
+            color: white;
+        }
+        .btn-venda-toy {
+            background-color: #e76f51;
+            color: white;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+        }
+        .btn-venda-toy:hover {
+            background-color: #cf5b3f;
+            color: white;
+        }
+        .titulo-secao {
+            color: #0077b6;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+<div class="topo-toy text-center py-4 mb-4 shadow-sm">
+    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo UniTOY" style="max-width: 150px; display: block; margin: 0 auto 15px auto; border-radius: 10px;">
+    <h1 class="fw-bold m-0 text-uppercase tracking-wide">🧸 UniTOY - Painel de Controle ✨</h1>
+    <p class="m-0 mt-1 opacity-75 fw-medium">Onde a mágica dos negócios acontece!</p>
+</div>
+
+    <div class="container">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                {% for categoria, msg in mensagens %}
+                    <div class="alert alert-{{ 'success' if categoria == 'success' else 'danger' }} alert-dismissible fade show shadow-sm border-0 rounded-4" role="alert">
+                        <strong>{{ '🎉 Sucesso!' if categoria == 'success' else '⚠️ Ops!' }}</strong> {{ msg }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <ul class="nav nav-tabs mb-4 justify-content-center border-0" id="menuAbas" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active shadow-sm px-4 py-2" id="prod-tab" data-bs-toggle="tab" data-bs-target="#aba-produtos" type="button" role="tab">📦 Brinquedos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link shadow-sm px-4 py-2" id="vend-tab" data-bs-toggle="tab" data-bs-target="#aba-vendedores" type="button" role="tab">👤 Equipe de Vendas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link shadow-sm px-4 py-2" id="vendas-tab" data-bs-toggle="tab" data-bs-target="#aba-vendas" type="button" role="tab">🎯 Registrar Saídas</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="conteudoAbas">
+            
+            <div class="tab-pane fade show active" id="aba-produtos" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card card-toy shadow-sm p-4">
+                            <h4 class="titulo-secao mb-3">🚀 Novo Brinquedo</h4>
+                            <form action="/cadastrar_produto" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold">Nome do Brinquedo</label>
+                                    <input type="text" name="descricao" class="form-control rounded-3" required placeholder="Ex: Urso de Pelúcia">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold">Preço de Venda (R$)</label>
+                                    <input type="text" name="preco" class="form-control rounded-3" required placeholder="Ex: 29,90">
+                                </div>
+                                <button type="submit" class="btn btn-gravar w-100 py-2 shadow-sm">Adicionar ao Estoque</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card card-toy shadow-sm p-4">
+                            <h4 class="titulo-secao mb-3">🧸 Prateleira de Brinquedos</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-info rounded-3">
+                                        <tr><th class="text-center" width="80">Código</th><th>Brinquedo</th><th class="text-center" width="150">Preço</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p in produtos %}
+                                        <tr>
+                                            <td class="text-center fw-bold text-secondary">#{{ p[0] }}</td>
+                                            <td class="fw-medium">{{ p[1] }}</td>
+                                            <td class="text-center fw-bold text-success">R$ {{ "{:.2f}".format(p[2]).replace('.', ',') }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="aba-vendedores" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card card-toy shadow-sm p-4">
+                            <h4 class="titulo-secao mb-3">🎈 Novo Colaborador</h4>
+                            <form action="/cadastrar_vendedor" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold">Nome do Vendedor</label>
+                                    <input type="text" name="nome" class="form-control rounded-3" required placeholder="Ex: Carlos Silva">
+                                </div>
+                                <button type="submit" class="btn btn-gravar w-100 py-2 shadow-sm">Cadastrar Vendedor</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card card-toy shadow-sm p-4">
+                            <h4 class="titulo-secao mb-3">👑 Nossa Equipe Nota 10</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-warning">
+                                        <tr><th class="text-center" width="120">ID Interno</th><th>Nome do Funcionário</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for v in vendedores %}
+                                        <tr>
+                                            <td class="text-center fw-bold text-secondary">#{{ v[0] }}</td>
+                                            <td class="fw-medium">{{ v[1] }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="aba-vendas" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card card-toy shadow-sm p-4">
+                            <h4 class="titulo-secao mb-3">🛒 Registrar Cupom</h4>
+                            <form action="/registrar_venda" method="POST">
+                                <div class="row mb-2">
+                                    <div class="col"><label class="form-label text-muted small fw-bold">ID Vendedor</label><input type="number" name="id_vendedor" class="form-control rounded-3" required></div>
+                                    <div class="col"><label class="form-label text-muted small fw-bold">ID Produto</label><input type="number" name="id_produto" class="form-control rounded-3" required></div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label text-muted small fw-bold">Quantidade</label>
+                                    <input type="number" name="quantidade" class="form-control rounded-3" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label text-muted small fw-bold">Valor Unitário (R$)</label>
+                                    <input type="text" name="valor_unitario" class="form-control rounded-3" required placeholder="Ex: 19,90">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small fw-bold">Desconto Especial (R$)</label>
+                                    <input type="text" name="desconto" class="form-control rounded-3" value="0">
+                                </div>
+                                <button type="submit" class="btn btn-venda-toy w-100 py-2 shadow-sm">Finalizar Venda! 🛍️</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card card-toy shadow-sm p-4">
+                            <h4 class="titulo-secao mb-3">📊 Histórico de Vendas Realizadas</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-success">
+                                        <tr><th class="text-center">Cupom</th><th>Quem Vendeu</th><th>O que Levou</th><th class="text-center">Qtd</th><th class="text-center">Total</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in vendas %}
+                                        <tr>
+                                            <td class="text-center fw-bold text-secondary">{{ row[0] }}</td>
+                                            <td class="fw-medium">{{ row[1] }}</td>
+                                            <td><span class="badge-toy">{{ row[2] }}</span></td>
+                                            <td class="text-center fw-bold">{{ row[3] }}</td>
+                                            <td class="text-center fw-bold text-primary">R$ {{ "{:.2f}".format(row[4]).replace('.', ',') }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section style="background: #e2eafc; padding: 40px 20px; border-radius: 15px; margin: 30px auto; max-width: 600px; font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
+        <h2 style="color: #023047; margin-bottom: 10px;">🧸 Agende um Test Drive de Brinquedos! ✨</h2>
+        <p style="color: #0077b6; margin-bottom: 25px; font-size: 14px;">Quer testar a velocidade da Ferrari ou a magia do Lego antes de levar? Escolha o dia e venha brincar na nossa loja física!</p>
+        
+        <form action="/agendar_test_drive" method="POST" style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+            <div>
+                <label style="font-weight: bold; color: #023047; font-size: 14px;">Seu Nome:</label>
+                <input type="text" name="nome_cliente" required placeholder="Digite seu nome completo" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+            </div>
+            
+            <div>
+                <label style="font-weight: bold; color: #023047; font-size: 14px;">Qual Brinquedo deseja testar?</label>
+                <input type="text" name="brinquedo" required placeholder="Ex: LEGO Pikachu, LEGO Ferrari..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="font-weight: bold; color: #023047; font-size: 14px;">Data:</label>
+                    <input type="date" name="data_agendamento" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-weight: bold; color: #023047; font-size: 14px;">Período:</label>
+                    <select name="periodo" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; background: white; height: 38px;">
+                        <option value="Manhã">Manhã (09h às 12h)</option>
+                        <option value="Tarde">Tarde (14h às 18h)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" style="background: #ffb703; color: #023047; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🚀 Confirmar Meu Agendamento Gratuito</button>
+        </form>
+    </section>
+
+    <button id="btn-chat" onclick="toggleChat()" style="position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: #ffb703; border: none; border-radius: 50%; color: white; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000;">🧸</button>
+
+    <div id="janela-chat" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 450px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); flex-direction: column; z-index: 1000; font-family: sans-serif; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+            <span>🤖 ToyBot - UniTOY</span>
+            <button onclick="toggleChat()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">×</button>
+        </div>
+        <div id="corpo-chat" style="flex: 1; padding: 15px; overflow-y: auto; background: #fefae0; display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: #e2eafc; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 14px; color: #023047;">
+                Olá! Eu sou o ToyBot! 🧸✨ Como posso ajudar você no Universo dos Brinquedos hoje?
+            </div>
+        </div>
+        <div style="padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 5px; background: white;">
+            <input type="text" id="txt-mensagem" placeholder="Digite sua mensagem..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; font-size: 14px;" onkeypress="if(event.key === 'Enter') enviarMensagemChat()">
+            <button onclick="enviarMensagemChat()" style="background: #0077b6; border: none; color: white; padding: 10px 15px; border-radius: 50%; cursor: pointer;">🚀</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleChat() {
+            const chat = document.getElementById('janela-chat');
+            chat.style.display = chat.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        async function enviarMensagemChat() {
+            const input = document.getElementById('txt-mensagem');
+            const mensagem = input.value.trim();
+            if (!mensagem) return;
+
+            input.value = '';
+            const corpoChat = document.getElementById('corpo-chat');
+
+            corpoChat.innerHTML += `<div style="background: #ffb703; color: #023047; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 80%; font-size: 14px; font-weight: bold;">${mensagem}</div>`;
+            corpoChat.scrollTop = corpoChat.scrollHeight;
+
+            const idDigitando = 'digitando-' + Date.now();
+            corpoChat.innerHTML += `<div id="${idDigitando}" style="background: #e2eafc; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 14px; color: #777;">ToyBot está pensando... 🧠</div>`;
+            corpoChat.scrollTop = corpoChat.scrollHeight;
+
+            try {
+                const respostaServidor = await fetch('/enviar_mensagem', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensagem: mensagem })
+                });
+                const dadosJson = await respostaServidor.getJson ? await respostaServidor.getJson() : await respostaServidor.json();
+                
+                document.getElementById(idDigitando).remove();
+                corpoChat.innerHTML += `<div style="background: #e2eafc; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 14px; color: #023047;">${dadosJson.resposta}</div>`;
+            } catch (erro) {
+                document.getElementById(idDigitando).remove();
+                corpoChat.innerHTML += `<div style="background: #ffccd5; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%; font-size: 14px; color: #ff0000;">Ih, falhou a conexão com o satélite de brinquedos! 🚀❌</div>`;
+            }
+            corpoChat.scrollTop = corpoChat.scrollHeight;
+        }
+    </script>
+</body>
+</html>
