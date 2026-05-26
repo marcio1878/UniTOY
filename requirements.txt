@@ -2,3 +2,31 @@ flask
 mysql-connector-python
 google-genai
 pyngrok
+
+# Cria o ambiente virtual
+python3 -m venv venv
+
+# Ativa o ambiente virtual
+source venv/bin/activate
+
+pip install flask mysql-connector-python google-genai pyngrok
+
+INSTALANDO A APLICAÇÃO:
+
+Windows:
+python3 -m venv venv
+.\venv\Scripts\Activate.ps1 (ou venv\Scripts\activate)
+pip install mysql-connector-python
+
+Linux / Mac:
+python3 -m venv venv
+source venv/bin/activate
+pip install mysql-connector-python
+
+Instalação local: sudo apt install mysql-server
+
+Dica: No Linux, o serviço do MySQL não inicia automaticamente da mesma forma que no Windows. Lembre-se de rodar:
+sudo systemctl start mysql
+sudo systemctl enable mysql
+
+pip install -r requirements.txt
