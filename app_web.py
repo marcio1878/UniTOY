@@ -12,7 +12,7 @@ def obter_conexao_banco():
     return mysql.connector.connect(
         host="127.0.0.1",
         user="aluno",
-        password="123",
+        password="",
         database="projeto_vendas_unitoy"
     )
 
