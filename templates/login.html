@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧸 UniTOY - Login Mágico!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Fundo mágico com cores alegres */
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #fad0c4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Comic Sans MS', 'Bubblegum Sans', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Brinquedos flutuando no fundo */
+        .floating-toys {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .toy-float {
+            position: absolute;
+            font-size: 3rem;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        /* Cartão de login estiloso */
+        .login-card {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 420px;
+            width: 100%;
+            z-index: 1;
+            border: 5px solid #ffb703;
+        }
+
+        /* Título Rainbow */
+        .title-rainbow {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: rainbow 3s linear infinite;
+            text-align: center;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* Campos de input super fofos */
+        .input-fofo {
+            border-radius: 20px;
+            padding: 15px 20px;
+            border: 3px solid #bde0fe;
+            background: #f0f8ff;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-fofo:focus {
+            border-color: #ffb703;
+            box-shadow: 0 0 15px rgba(255, 183, 3, 0.3);
+            background: white;
+        }
+
+        .input-fofo::placeholder {
+            color: #a0a0a0;
+        }
+
+        /* Labels coloridos */
+        .label-colorido {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .label-usuario { color: #0077b6; }
+        .label-senha { color: #e76f51; }
+        .label-tipo { color: #2a9d8f; }
+
+        /* Botão mágico de login */
+        .btn-magico {
+            background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #023047;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 183, 3, 0.4);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-magico:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(255, 183, 3, 0.6);
+            background: linear-gradient(135deg, #fb8500 0%, #ffb703 100%);
+        }
+
+        .btn-magico:active {
+            transform: translateY(0);
+        }
+
+        /* Seletor de tipo de usuário */
+        .tipo-seletor {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tipo-opcao {
+            flex: 1;
+            padding: 15px;
+            border-radius: 20px;
+            border: 3px solid #e0e0e0;
+            background: #f5f5f5;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tipo-opcao:hover {
+            border-color: #bde0fe;
+        }
+
+        .tipo-opcao.selecionado {
+            border-color: #ffb703;
+            background: #fff8e1;
+        }
+
+        .tipo-opcao .icone {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .tipo-opcao .texto {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Mensagem de erro卡通 */
+        .erro-mensagem {
+            background: #ff6b6b;
+            color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Logo fofa */
+        .logo-toy {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-toy img {
+            max-width: 120px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Indicador de senha */
+        .senha-dica {
+            background: #e2eafc;
+            border-radius: 15px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #0077b6;
+            text-align: center;
+        }
+
+        /* Animação de sucesso */
+        @keyframes success-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .success-animation {
+            animation: success-pop 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Brinquedos flutuando no fundo -->
+    <div class="floating-toys">
+        <div class="toy-float" style="top: 10%; left: 10%; animation-delay: 0s;">🧸</div>
+        <div class="toy-float" style="top: 20%; left: 80%; animation-delay: 1s;">🚗</div>
+        <div class="toy-float" style="top: 60%; left: 5%; animation-delay: 2s;">🎮</div>
+        <div class="toy-float" style="top: 70%; left: 85%; animation-delay: 0.5s;">🧩</div>
+        <div class="toy-float" style="top: 40%; left: 90%; animation-delay: 1.5s;">🦄</div>
+        <div class="toy-float" style="top: 80%; left: 15%; animation-delay: 2.5s;">🤖</div>
+    </div>
+
+    <div class="login-card">
+        <div class="logo-toy">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo UniTOY" onerror="this.style.display='none';document.getElementById('logo-texto').style.display='block'">
+            <div id="logo-texto" style="display:none; font-size: 4rem;">🧸</div>
+        </div>
+
+        <h1 class="title-rainbow mb-2">UniTOY Mágico! ✨</h1>
+        <p class="text-center text-muted mb-4"> faça login para entrar no mundo dos brinquedos!</p>
+
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                {% for categoria, msg in mensagens %}
+                    {% if categoria == 'danger' %}
+                    <div class="erro-mensagem">
+                        ⚠️ {{ msg }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="/login" method="POST" id="form-login">
+            <!-- Seletor de tipo de usuário -->
+            <label class="label-colorido label-tipo">👤 Quem é você?</label>
+            <div class="tipo-seletor">
+                <div class="tipo-opcao selecionado" onclick="selecionarTipo('admin', this)" id="opcao-admin">
+                    <span class="icone">👑</span>
+                    <span class="texto">Dono/Admin</span>
+                </div>
+                <div class="tipo-opcao" onclick="selecionarTipo('cliente', this)" id="opcao-cliente">
+                    <span class="icone">😊</span>
+                    <span class="texto">Cliente</span>
+                </div>
+            </div>
+
+            <!-- Campo usuário/email -->
+            <div class="mb-3">
+                <label class="label-colorido label-usuario" id="label-usuario">👑 Usuário Admin</label>
+                <input type="text" name="usuario" class="form-control input-fofo" id="input-usuario" placeholder="Digite seu usuário..." required>
+            </div>
+
+            <!-- Campo senha -->
+            <div class="mb-3">
+                <label class="label-colorido label-senha">🔐 Sua Senha Secreta</label>
+                <input type="password" name="senha" class="form-control input-fofo" id="input-senha" placeholder="Digite a senha..." required>
+            </div>
+
+            <!-- Dica de senha -->
+            <div class="senha-dica" id="dica-senha">
+                💡 Dica: Use <strong>1234</strong> para testar!
+            </div>
+
+            <!-- Botão de login -->
+            <button type="submit" class="btn-magico">
+                🚀 Entrar no Mundo Mágico!
+            </button>
+        </form>
+
+        <!-- Rodapé -->
+        <p class="text-center mt-4 text-muted" style="font-size: 0.85rem;">
+            🧸 UniTOY - Onde a diversão nunca acaba!
+        </p>
+    </div>
+
+    <script>
+        let tipoAtual = 'admin';
+
+        function selecionarTipo(tipo, elemento) {
+            tipoAtual = tipo;
+            
+            // Remove seleção anterior
+            document.querySelectorAll('.tipo-opcao').forEach(op => {
+                op.classList.remove('selecionado');
+            });
+            
+            // Adiciona seleção ao clicar
+            elemento.classList.add('selecionado');
+            
+            // Atualiza labels
+            const labelUsuario = document.getElementById('label-usuario');
+            const inputUsuario = document.getElementById('input-usuario');
+            const dicaSenha = document.getElementById('dica-senha');
+            
+            if (tipo === 'admin') {
+                labelUsuario.innerHTML = '👑 Usuário Admin';
+                inputUsuario.placeholder = 'Digite admin...';
+                dicaSenha.innerHTML = '💡 Dica: Use <strong>1234</strong> para testar!';
+            } else {
+                labelUsuario.innerHTML = '📧 Email do Cliente';
+                inputUsuario.placeholder = 'seu@email.com';
+                dicaSenha.innerHTML = '💡 Use <strong>1234</strong> para testar como cliente!';
+            }
+        }
+
+        // Animação no submit
+        document.getElementById('form-login').addEventListener('submit', function(e) {
+            const botao = document.querySelector('.btn-magico');
+            botao.innerHTML = '⏳ Entrando...';
+            botao.classList.add('success-animation');
+        });
+    </script>
+</body>
+</html>
