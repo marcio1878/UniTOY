@@ -6,14 +6,14 @@ from google import genai
 app = Flask(__name__)
 app.secret_key = "chave_secreta_unitoy_para_alertas"
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+CLIENTE_GEMINI = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def obter_conexao_banco():
     return mysql.connector.connect(
-        host=os.environ.get("DB_HOST", "127.0.0.1"),
-        user=os.environ.get("DB_USER", "aluno"),
-        password=os.environ.get("DB_PASS", "123"),
-        database=os.environ.get("DB_NAME", "projeto_vendas_unitoy")
+        host="127.0.0.1",
+        user="aluno",
+        password="123",
+        database="projeto_vendas_unitoy"
     )
 
 @app.route('/')
@@ -124,7 +124,7 @@ def enviar_mensagem():
 
     contexto_loja = f"Você é o ToyBot, o assistente da UniTOY. Lista de produtos:\n{lista_brinquedos_texto}"
     try:
-        resposta = client.models.generate_content(
+        resposta = CLIENTE_GEMINI.models.generate_content(
             model='gemini-2.0-flash',
             contents=f"{contexto_loja}\n\nCliente: {mensagem_usuario}\nToyBot:"
         )
@@ -133,4 +133,4 @@ def enviar_mensagem():
         return jsonify({'resposta': f"Erro no sistema: {str(e)}"})
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=True)
