@@ -1,32 +1,29 @@
-import flask
+import os
 import mysql.connector
+from flask import Flask, request, render_template, redirect, flash, jsonify
 from google import genai
-from pyngrok import ngrok
 
-app = flask.Flask(__name__)
+app = Flask(__name__)
 app.secret_key = "chave_secreta_unitoy_para_alertas"
 
-CLIENTE_GEMINI = genai.Client(api_key="")
+CLIENTE_GEMINI = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def obter_conexao_banco():
     return mysql.connector.connect(
-        host="127.0.0.1",
-        user="aluno",
-        password="",
-        database="projeto_vendas_unitoy"
+        host=os.environ.get("DB_HOST", "127.0.0.1"),
+        user=os.environ.get("DB_USER", "aluno"),
+        password=os.environ.get("DB_PASS", "123"),
+        database=os.environ.get("DB_NAME", "projeto_vendas_unitoy")
     )
 
 @app.route('/')
 def index():
     conexao = obter_conexao_banco()
     cursor = conexao.cursor()
-
     cursor.execute("SELECT id, descricao, preco, quantidade FROM produtos")
     produtos_banco = cursor.fetchall()
-
     cursor.execute("SELECT id, nome FROM vendedores")
     vendedores_banco = cursor.fetchall()
-
     cursor.execute("""
         SELECT v.id, vend.nome, p.descricao, vp.quantidade, v.valor_final
         FROM vendas v
@@ -35,16 +32,14 @@ def index():
         JOIN produtos p ON vp.id_produto = p.id
     """)
     vendas_banco = cursor.fetchall()
-
     cursor.close()
     conexao.close()
-
-    return flask.render_template('index.html', produtos=produtos_banco, vendedores=vendedores_banco, vendas=vendas_banco)
+    return render_template('index.html', produtos=produtos_banco, vendedores=vendedores_banco, vendas=vendas_banco)
 
 @app.route('/cadastrar_produto', methods=['POST'])
 def cadastrar_produto():
-    descricao = flask.request.form.get('descricao')
-    preco = flask.request.form.get('preco').replace(',', '.')
+    descricao = request.form.get('descricao')
+    preco = request.form.get('preco').replace(',', '.')
     try:
         conexao = obter_conexao_banco()
         cursor = conexao.cursor()
@@ -52,14 +47,14 @@ def cadastrar_produto():
         conexao.commit()
         cursor.close()
         conexao.close()
-        flask.flash("Brinquedo adicionado com sucesso!", "success")
+        flash("Brinquedo adicionado com sucesso!", "success")
     except Exception as e:
-        flask.flash(f"Erro ao cadastrar produto: {e}", "danger")
-    return flask.redirect('/')
+        flash(f"Erro ao cadastrar produto: {e}", "danger")
+    return redirect('/')
 
 @app.route('/cadastrar_vendedor', methods=['POST'])
 def cadastrar_vendedor():
-    nome = flask.request.form.get('nome')
+    nome = request.form.get('nome')
     try:
         conexao = obter_conexao_banco()
         cursor = conexao.cursor()
@@ -67,17 +62,17 @@ def cadastrar_vendedor():
         conexao.commit()
         cursor.close()
         conexao.close()
-        flask.flash("Vendedor cadastrado com sucesso!", "success")
+        flash("Vendedor cadastrado com sucesso!", "success")
     except Exception as e:
-        flask.flash(f"Erro ao cadastrar vendedor: {e}", "danger")
-    return flask.redirect('/')
+        flash(f"Erro ao cadastrar vendedor: {e}", "danger")
+    return redirect('/')
 
 @app.route('/registrar_venda', methods=['POST'])
 def registrar_venda():
-    id_vendedor = flask.request.form.get('id_vendedor')
-    id_produto = flask.request.form.get('id_produto')
-    quantidade = flask.request.form.get('quantidade')
-    valor_final = flask.request.form.get('valor_unitario').replace(',', '.') 
+    id_vendedor = request.form.get('id_vendedor')
+    id_produto = request.form.get('id_produto')
+    quantidade = request.form.get('quantidade')
+    valor_final = request.form.get('valor_unitario').replace(',', '.') 
     try:
         conexao = obter_conexao_banco()
         cursor = conexao.cursor()
@@ -87,33 +82,32 @@ def registrar_venda():
         conexao.commit()
         cursor.close()
         conexao.close()
-        flask.flash("Venda finalizada com sucesso!", "success")
+        flash("Venda finalizada com sucesso!", "success")
     except Exception as e:
-        flask.flash(f"Erro ao registrar venda: {e}", "danger")
-    return flask.redirect('/')
+        flash(f"Erro ao registrar venda: {e}", "danger")
+    return redirect('/')
 
 @app.route('/agendar_test_drive', methods=['POST'])
 def agendar_test_drive():
-    nome = flask.request.form.get('nome_cliente')
-    brinquedo = flask.request.form.get('brinquedo')
-    data = flask.request.form.get('data_agendamento')
-    periodo = flask.request.form.get('periodo')
+    nome = request.form.get('nome_cliente')
+    brinquedo = request.form.get('brinquedo')
+    data = request.form.get('data_agendamento')
+    periodo = request.form.get('periodo')
     try:
         conexao = obter_conexao_banco()
         cursor = conexao.cursor()
-        comando_sql = "INSERT INTO agendamentos_test_drive (nome_cliente, brinquedo, data_agendamento, periodo) VALUES (%s, %s, %s, %s)"
-        cursor.execute(comando_sql, (nome, brinquedo, data, periodo))
+        cursor.execute("INSERT INTO agendamentos_test_drive (nome_cliente, brinquedo, data_agendamento, periodo) VALUES (%s, %s, %s, %s)", (nome, brinquedo, data, periodo))
         conexao.commit()
         cursor.close()
         conexao.close()
-        flask.flash("Test Drive agendado com sucesso!", "success")
+        flash("Test Drive agendado com sucesso!", "success")
     except Exception as e:
-        flask.flash(f"Erro ao agendar Test Drive: {e}", "danger")
-    return flask.redirect('/')
+        flash(f"Erro ao agendar Test Drive: {e}", "danger")
+    return redirect('/')
 
 @app.route('/enviar_mensagem', methods=['POST'])
 def enviar_mensagem():
-    dados = flask.request.get_json()
+    dados = request.get_json()
     mensagem_usuario = dados.get('mensagem', '')
     lista_brinquedos_texto = ""
     try:
@@ -129,23 +123,14 @@ def enviar_mensagem():
         lista_brinquedos_texto = "- LEGO Hogwarts: R$ 899.90\n- LEGO Ferrari: R$ 349.90"
 
     contexto_loja = f"Você é o ToyBot, o assistente da UniTOY. Lista de produtos:\n{lista_brinquedos_texto}"
-
     try:
         resposta = CLIENTE_GEMINI.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=f"{contexto_loja}\n\nCliente: {mensagem_usuario}\nToyBot:"
         )
-        return flask.jsonify({'resposta': resposta.text})
+        return jsonify({'resposta': resposta.text})
     except Exception as e:
-        return flask.jsonify({'resposta': f"Erro no sistema: {str(e)}"})
+        return jsonify({'resposta': f"Erro no sistema: {str(e)}"})
 
 if __name__ == '__main__':
-    try:
-        TOKEN_REAL = "3E9okAR7zqsWQGRyuonCMTTqRGZ_4CCcCPFtBe3L8P81ywRau"
-        ngrok.set_auth_token(TOKEN_REAL)
-        link_publico = ngrok.connect(5000)
-        print(f"\n🧸 UniTOY ONLINE: {link_publico.public_url}\n")
-    except Exception as e:
-        print(f"Aviso: Túnel Ngrok não iniciado: {e}")
-
-    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=5000, debug=False)
