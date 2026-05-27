@@ -6,7 +6,7 @@ from google import genai
 app = Flask(__name__)
 app.secret_key = "chave_secreta_unitoy_para_alertas"
 
-CLIENTE_GEMINI = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def obter_conexao_banco():
     return mysql.connector.connect(
@@ -124,7 +124,7 @@ def enviar_mensagem():
 
     contexto_loja = f"Você é o ToyBot, o assistente da UniTOY. Lista de produtos:\n{lista_brinquedos_texto}"
     try:
-        resposta = CLIENTE_GEMINI.models.generate_content(
+        resposta = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=f"{contexto_loja}\n\nCliente: {mensagem_usuario}\nToyBot:"
         )
