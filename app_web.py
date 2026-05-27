@@ -273,7 +273,7 @@ def configure_gemini(api_key):
 
 if __name__ == '__main__':
     # ✅ Coloque aqui sua chave da API do Gemini (Google AI Studio)
-    configure_gemini("AQ.Ab8RN6Ka-IgJySUYsoXWJAj_vcDJtrLibY9XExmbdr4HL7u5Lg")
+    configure_gemini("")
 
     try:
         # ✅ Coloque aqui seu token do Ngrok (dashboard.ngrok.com)
