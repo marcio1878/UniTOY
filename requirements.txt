@@ -2,3 +2,4 @@ Flask
 mysql-connector-python
 google-genai
 gunicorn
+google-api-core
