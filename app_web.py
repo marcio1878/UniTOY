@@ -25,7 +25,7 @@ def obter_conexao_banco():
     return mysql.connector.connect(
         host="127.0.0.1",
         user="aluno",
-        password="123",
+        password="",
         database="projeto_vendas_unitoy"
     )
 
@@ -95,13 +95,80 @@ def admin():
     total_vendedores = cursor.fetchone()[0]
     cursor.execute("SELECT COUNT(*) FROM vendas")
     total_vendas = cursor.fetchone()[0]
+    cursor.execute("SELECT id, descricao, preco, quantidade FROM produtos")
+    produtos = cursor.fetchall()
+    cursor.execute("SELECT id, nome_cliente, brinquedo, data_agendamento, periodo FROM agendamentos_test_drive ORDER BY data_agendamento DESC")
+    agendamentos = cursor.fetchall()
     cursor.close()
     conexao.close()
     
     return flask.render_template('admin.html',
                                  total_produtos=total_produtos,
                                  total_vendedores=total_vendedores,
-                                 total_vendas=total_vendas)
+                                 total_vendas=total_vendas,
+                                 produtos=produtos,
+                                 agendamentos=agendamentos)
+
+@app.route('/cancelar_agendamento/<int:id>', methods=['POST'])
+def cancelar_agendamento(id):
+    """Cancela um agendamento de test drive (apenas admin)"""
+    if not verificar_logado() or flask.session.get('tipo_usuario') != 'admin':
+        flask.flash("⚠️ Acesso restrito ao administrador!", "warning")
+        return flask.redirect('/login')
+    try:
+        conexao = obter_conexao_banco()
+        cursor = conexao.cursor()
+        cursor.execute("DELETE FROM agendamentos_test_drive WHERE id = %s", (id,))
+        conexao.commit()
+        cursor.close()
+        conexao.close()
+        flask.flash("Agendamento cancelado com sucesso! 🗑️", "success")
+    except Exception as e:
+        flask.flash(f"Erro ao cancelar agendamento: {e}", "danger")
+    return flask.redirect('/admin')
+
+@app.route('/remover_produto/<int:id>', methods=['POST'])
+def remover_produto(id):
+    """Remove um produto (apenas admin)"""
+    if not verificar_logado() or flask.session.get('tipo_usuario') != 'admin':
+        flask.flash("⚠️ Acesso restrito ao administrador!", "warning")
+        return flask.redirect('/login')
+    try:
+        conexao = obter_conexao_banco()
+        cursor = conexao.cursor()
+        cursor.execute("DELETE FROM produtos WHERE id = %s", (id,))
+        conexao.commit()
+        cursor.close()
+        conexao.close()
+        flask.flash("Produto removido com sucesso! 🗑️", "success")
+    except Exception as e:
+        flask.flash(f"Erro ao remover produto: {e}", "danger")
+    return flask.redirect('/admin')
+
+@app.route('/atualizar_produto', methods=['POST'])
+def atualizar_produto():
+    """Atualiza um produto (apenas admin)"""
+    if not verificar_logado() or flask.session.get('tipo_usuario') != 'admin':
+        flask.flash("⚠️ Acesso restrito ao administrador!", "warning")
+        return flask.redirect('/login')
+    id_produto = flask.request.form.get('id')
+    descricao = flask.request.form.get('descricao')
+    preco = flask.request.form.get('preco').replace(',', '.')
+    quantidade = flask.request.form.get('quantidade')
+    try:
+        conexao = obter_conexao_banco()
+        cursor = conexao.cursor()
+        cursor.execute(
+            "UPDATE produtos SET descricao = %s, preco = %s, quantidade = %s WHERE id = %s",
+            (descricao, float(preco), int(quantidade), id_produto)
+        )
+        conexao.commit()
+        cursor.close()
+        conexao.close()
+        flask.flash("Produto atualizado com sucesso! ✅", "success")
+    except Exception as e:
+        flask.flash(f"Erro ao atualizar produto: {e}", "danger")
+    return flask.redirect('/admin')
 
 @app.route('/')
 def index():
@@ -277,7 +344,7 @@ if __name__ == '__main__':
 
     try:
         # ✅ Coloque aqui seu token do Ngrok (dashboard.ngrok.com)
-        TOKEN_NGROK = "3E9okAR7zqsWQGRyuonCMTTqRGZ_4CCcCPFtBe3L8P81ywRau"
+        TOKEN_NGROK = ""
         ngrok.set_auth_token(TOKEN_NGROK)
         link_publico = ngrok.connect(5000)
         print(f"\n🧸 UniTOY ONLINE: {link_publico.public_url}\n")
